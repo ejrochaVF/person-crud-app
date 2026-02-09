@@ -11,21 +11,21 @@
  * - Success/error callbacks
  */
 
-import { useState, useCallback, useMemo } from 'react';
-import personService from '../services/personService';
+import { useState, useCallback, useMemo, useEffect } from 'react';
+import personService, { Person, CreatePersonData } from '../services/personService';
 import useApi from './useApi';
 import config from '../config/appConfig';
 
 const usePersons = () => {
-  const [persons, setPersons] = useState([]);
-  const [successMessage, setSuccessMessage] = useState('');
+  const [persons, setPersons] = useState<Person[]>([]);
+  const [successMessage, setSuccessMessage] = useState<string>('');
 
   const api = useApi();
 
   /**
    * Show success message that auto-clears
    */
-  const showSuccess = useCallback((message) => {
+  const showSuccess = useCallback((message: string) => {
     setSuccessMessage(message);
     setTimeout(() => setSuccessMessage(''), config.ui.successMessageDuration);
   }, []);
@@ -33,7 +33,7 @@ const usePersons = () => {
   /**
    * Fetch all persons (used internally by the hook)
    */
-  const fetchPersons = useCallback(async () => {
+  const fetchPersons = useCallback(async (): Promise<void> => {
     try {
       const data = await personService.getAllPersons();
       setPersons(data);
@@ -43,10 +43,15 @@ const usePersons = () => {
     }
   }, []); // No dependencies needed since we use personService directly
 
+  // Fetch persons on mount
+  useEffect(() => {
+    fetchPersons();
+  }, [fetchPersons]);
+
   /**
    * Create person with optimistic update
    */
-  const createPerson = useCallback(async (personData) => {
+  const createPerson = useCallback(async (personData: CreatePersonData): Promise<Person> => {
     // Create temporary person for optimistic update
     const tempPerson = {
       ...personData,
@@ -73,7 +78,7 @@ const usePersons = () => {
 
       return newPerson;
 
-    } catch (error) {
+    } catch (error: any) {
       // Rollback: Remove optimistic person
       setPersons(prev => prev.filter(p => p.id !== tempPerson.id));
 
@@ -91,10 +96,10 @@ const usePersons = () => {
   /**
    * Update person with optimistic update
    */
-  const updatePerson = useCallback(async (id, personData) => {
+  const updatePerson = useCallback(async (id: number, personData: CreatePersonData): Promise<Person> => {
     // Store original person for rollback
     const originalPerson = persons.find(p => p.id === id);
-    if (!originalPerson) return;
+    if (!originalPerson) throw new Error('Person not found - it may have been deleted or the list is not loaded');
 
     // Optimistically update UI
     setPersons(prev =>
@@ -117,7 +122,7 @@ const usePersons = () => {
 
       return updatedPerson;
 
-    } catch (error) {
+    } catch (error: any) {
       // Rollback: Restore original person
       setPersons(prev =>
         prev.map(p => p.id === id ? originalPerson : p)
@@ -137,7 +142,7 @@ const usePersons = () => {
   /**
    * Delete person with optimistic update
    */
-  const deletePerson = useCallback(async (id) => {
+  const deletePerson = useCallback(async (id: number): Promise<void> => {
     // Store person for rollback
     const personToDelete = persons.find(p => p.id === id);
     if (!personToDelete) return;
@@ -154,7 +159,7 @@ const usePersons = () => {
         }
       );
 
-    } catch (error) {
+    } catch (error: any) {
       // Rollback: Add person back
       setPersons(prev => [personToDelete, ...prev]);
 
@@ -176,7 +181,8 @@ const usePersons = () => {
     deletePerson,
 
     // Utilities
-    resetError: api.reset
+    resetError: api.reset,
+    fetchPersons
   }), [
     persons,
     successMessage,
@@ -185,7 +191,8 @@ const usePersons = () => {
     createPerson,
     updatePerson,
     deletePerson,
-    api.reset
+    api.reset,
+    fetchPersons
   ]);
 };
 

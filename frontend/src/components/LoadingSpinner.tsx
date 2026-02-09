@@ -7,7 +7,13 @@
 
 import React from 'react';
 
-const LoadingSpinner = ({
+interface LoadingSpinnerProps {
+  size?: 'small' | 'medium' | 'large';
+  message?: string;
+  fullScreen?: boolean;
+}
+
+const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   size = 'medium',
   message = 'Loading...',
   fullScreen = false

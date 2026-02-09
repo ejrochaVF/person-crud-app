@@ -13,14 +13,21 @@
 import { useState, useCallback, useMemo } from 'react';
 import config from '../config/appConfig';
 
+interface ApiOptions {
+  retries?: number;
+  retryDelay?: number;
+  onSuccess?: (result: any) => void;
+  onError?: (error: any) => void;
+}
+
 const useApi = () => {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<any>(null);
 
   /**
    * Sleep utility for retry delays
    */
-  const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+  const sleep = (ms: number): Promise<void> => new Promise(resolve => setTimeout(resolve, ms));
 
   /**
    * Execute an API call with retry logic
@@ -31,7 +38,7 @@ const useApi = () => {
    * @param {Function} options.onSuccess - Callback for success
    * @param {Function} options.onError - Callback for error
    */
-  const execute = useCallback(async (apiCall, options = {}) => {
+  const execute = useCallback(async (apiCall: () => Promise<any>, options: ApiOptions = {}): Promise<any> => {
     const {
       retries = config.ui.retryAttempts,
       retryDelay = config.ui.retryDelay,
@@ -57,7 +64,7 @@ const useApi = () => {
 
         return result;
 
-      } catch (err) {
+      } catch (err: any) {
         lastError = err;
 
         // Don't retry on validation errors (4xx)

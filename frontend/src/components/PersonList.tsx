@@ -9,112 +9,75 @@
  * - Better loading states
  */
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState } from 'react';
 import PersonItem from './PersonItem';
 import PersonForm from './PersonForm';
 import LoadingSpinner from './LoadingSpinner';
 import usePersons from '../hooks/usePersons';
-import personService from '../services/personService';
+import { Person, CreatePersonData } from '../services/personService';
 import config from '../config/appConfig';
 
-const PersonList = () => {
+const PersonList: React.FC = () => {
   // State for UI management (form visibility, editing)
-  const [showForm, setShowForm] = useState(false);
-  const [editingPerson, setEditingPerson] = useState(null);
+  const [showForm, setShowForm] = useState<boolean>(false);
+  const [editingPerson, setEditingPerson] = useState<Person | null>(null);
 
-  // Ref to prevent infinite API calls
-  const hasFetchedRef = useRef(false);
-
-  // Use custom hook for person operations (excluding fetchPersons for initial load)
+  // Use custom hook for person operations
   const {
-    persons: hookPersons,
+    persons,
     successMessage,
     loading,
     error,
     createPerson,
     updatePerson,
     deletePerson,
-    resetError
+    resetError,
+    fetchPersons
   } = usePersons();
-
-  // Use local persons state for initial load, hook persons for operations
-  const [persons, setPersons] = useState(hookPersons);
-
-  /**
-   * useEffect Hook - Fetch persons when component mounts
-   */
-  useEffect(() => {
-    const loadPersons = async () => {
-      try {
-        setPersons([]); // Clear any existing data
-        const data = await personService.getAllPersons();
-        setPersons(data);
-      } catch (err) {
-        console.error('Error fetching persons:', err);
-        // Error will be handled by the hook's error state if needed
-      }
-    };
-
-    if (!hasFetchedRef.current) {
-      hasFetchedRef.current = true;
-      loadPersons();
-    }
-  }, []); // Empty dependency array - only run once on mount
 
   /**
    * Handle creating a new person
    */
-  const handleCreate = async (personData) => {
+  const handleCreate = async (personData: CreatePersonData): Promise<void> => {
     try {
       await createPerson(personData);
       // Hide form on success (handled by optimistic update hook)
       setShowForm(false);
-    } catch (error) {
-      // Error already handled by hook
-      throw error;
+    } catch (error: any) {
+      alert('Failed to create person: ' + (error.message || 'Unknown error'));
     }
   };
 
   /**
    * Handle updating a person
    */
-  const handleUpdate = async (personData) => {
+  const handleUpdate = async (personData: CreatePersonData): Promise<void> => {
+    if (!editingPerson) return;
     try {
       await updatePerson(editingPerson.id, personData);
       // Hide form and clear editing state on success
       setShowForm(false);
       setEditingPerson(null);
-    } catch (error) {
-      // Error already handled by hook
-      throw error;
+    } catch (error: any) {
+      alert('Failed to update person: ' + (error.message || 'Unknown error'));
     }
   };
 
   /**
    * Handle deleting a person
    */
-  const handleDelete = async (id) => {
-    // Confirmation dialog
-    const person = persons.find(p => p.id === id);
-    if (!person) return;
-
-    const confirmDelete = window.confirm(
-      `Are you sure you want to delete ${person.name} ${person.surname}?`
-    );
-
-    if (confirmDelete) {
-      try {
-        await deletePerson(id);
-      } catch (error) {
-        // Error already handled by hook
-      }
+  const handleDelete = async (id: number): Promise<void> => {
+    try {
+      await deletePerson(id);
+    } catch (error) {
+      // Error already handled by hook
     }
   };
 
   /**
    * Handle edit button click
    */
-  const handleEdit = (person) => {
+  const handleEdit = (person: Person) => {
     setEditingPerson(person);
     setShowForm(true);
   };
@@ -141,9 +104,7 @@ const PersonList = () => {
   const handleRetry = async () => {
     resetError();
     try {
-      setPersons([]); // Clear any existing data
-      const data = await personService.getAllPersons();
-      setPersons(data);
+      await fetchPersons();
     } catch (err) {
       console.error('Error retrying fetch:', err);
       // Error will be handled by the hook's error state

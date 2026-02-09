@@ -17,7 +17,9 @@ import ReactDOM from 'react-dom/client';
 import App from './App';
 
 // Get the root element from index.html
-const root = ReactDOM.createRoot(document.getElementById('root'));
+const rootElement = document.getElementById('root');
+if (!rootElement) throw new Error('Root element not found');
+const root = ReactDOM.createRoot(rootElement);
 
 // Render the React app
 root.render(

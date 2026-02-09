@@ -20,8 +20,16 @@
  */
 
 import React from 'react';
+import { Person } from '../services/personService';
 
-const PersonItem = ({ person, onEdit, onDelete, isOptimistic = false }) => {
+interface PersonItemProps {
+  person: Person;
+  onEdit: (person: Person) => void;
+  onDelete: (id: number) => void;
+  isOptimistic?: boolean;
+}
+
+const PersonItem: React.FC<PersonItemProps> = ({ person, onEdit, onDelete, isOptimistic = false }) => {
   /**
    * Handle delete with confirmation
    * 

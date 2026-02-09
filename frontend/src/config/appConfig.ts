@@ -5,7 +5,34 @@
  * Uses environment variables for different environments
  */
 
-const config = {
+interface Config {
+  api: {
+    baseURL: string;
+    endpoints: {
+      persons: string;
+    };
+    timeout: number;
+    personsURL?: string;
+  };
+  app: {
+    name: string;
+    version: string;
+    environment: string;
+  };
+  features: {
+    optimisticUpdates: boolean;
+    retryOnFailure: boolean;
+    errorBoundary: boolean;
+  };
+  ui: {
+    defaultLoadingMessage: string;
+    successMessageDuration: number;
+    retryAttempts: number;
+    retryDelay: number;
+  };
+}
+
+const config: Config = {
   // API Configuration
   api: {
     baseURL: process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000',

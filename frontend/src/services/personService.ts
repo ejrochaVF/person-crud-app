@@ -24,11 +24,30 @@
 import axios from 'axios';
 import config from '../config/appConfig';
 
+// Types
+interface Person {
+  id: number;
+  name: string;
+  surname: string;
+  email: string;
+  address: string;
+  phone: string;
+  isOptimistic?: boolean;
+}
+
+interface CreatePersonData {
+  name: string;
+  surname: string;
+  email: string;
+  address: string;
+  phone: string;
+}
+
 // Configure axios defaults
 axios.defaults.timeout = config.api.timeout;
 
 // Base URL for all API calls - now from config
-const API_URL = config.api.personsURL;
+const API_URL = config.api.personsURL as string;
 
 /**
  * PersonService Object
@@ -43,7 +62,7 @@ const personService = {
    * @returns {Promise<Array>} Array of person objects
    * @throws {Error} If the request fails
    */
-  getAllPersons: async () => {
+  getAllPersons: async (): Promise<Person[]> => {
     try {
       const response = await axios.get(API_URL);
       // Backend returns: { success: true, count: X, data: [...] }
@@ -63,7 +82,7 @@ const personService = {
    * @returns {Promise<Object>} Person object
    * @throws {Error} If person not found or request fails
    */
-  getPersonById: async (id) => {
+  getPersonById: async (id: number): Promise<Person> => {
     try {
       const response = await axios.get(`${API_URL}/${id}`);
       return response.data.data;
@@ -87,11 +106,11 @@ const personService = {
    * @returns {Promise<Object>} Created person object
    * @throws {Error} If validation fails or request fails
    */
-  createPerson: async (personData) => {
+  createPerson: async (personData: CreatePersonData): Promise<Person> => {
     try {
       const response = await axios.post(API_URL, personData);
       return response.data.data;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating person:', error);
       // If backend returns validation errors
       if (error.response && error.response.data) {
@@ -111,11 +130,11 @@ const personService = {
    * @returns {Promise<Object>} Updated person object
    * @throws {Error} If person not found, validation fails, or request fails
    */
-  updatePerson: async (id, personData) => {
+  updatePerson: async (id: number, personData: CreatePersonData): Promise<Person> => {
     try {
       const response = await axios.put(`${API_URL}/${id}`, personData);
       return response.data.data;
-    } catch (error) {
+    } catch (error: any) {
       console.error(`Error updating person ${id}:`, error);
       if (error.response && error.response.data) {
         throw error.response.data;
@@ -133,15 +152,16 @@ const personService = {
    * @returns {Promise<void>}
    * @throws {Error} If person not found or request fails
    */
-  deletePerson: async (id) => {
+  deletePerson: async (id: number): Promise<void> => {
     try {
       await axios.delete(`${API_URL}/${id}`);
       // No data returned, just success
-    } catch (error) {
+    } catch (error: any) {
       console.error(`Error deleting person ${id}:`, error);
       throw error;
     }
   }
 };
 
+export type { Person, CreatePersonData };
 export default personService;

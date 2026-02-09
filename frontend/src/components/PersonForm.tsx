@@ -21,11 +21,19 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { Person, CreatePersonData } from '../services/personService';
 
-const PersonForm = ({ person, onSubmit, onCancel, loading = false }) => {
+interface PersonFormProps {
+  person: Person | null;
+  onSubmit: (data: CreatePersonData) => Promise<void>;
+  onCancel: () => void;
+  loading?: boolean;
+}
+
+const PersonForm: React.FC<PersonFormProps> = ({ person, onSubmit, onCancel, loading = false }) => {
   // State for form fields
   // This is a controlled component - React controls the input values
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<CreatePersonData>({
     name: '',
     surname: '',
     email: '',
@@ -33,8 +41,8 @@ const PersonForm = ({ person, onSubmit, onCancel, loading = false }) => {
     phone: ''
   });
 
-  const [errors, setErrors] = useState({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
   /**
    * useEffect Hook
@@ -73,7 +81,7 @@ const PersonForm = ({ person, onSubmit, onCancel, loading = false }) => {
    * 3. This function updates the state
    * 4. React re-renders with new value
    */
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,      // Keep all other fields
@@ -96,7 +104,7 @@ const PersonForm = ({ person, onSubmit, onCancel, loading = false }) => {
    * Backend will also validate (more thorough)
    */
   const validateForm = () => {
-    const newErrors = {};
+    const newErrors: Record<string, string> = {};
 
     if (!formData.name.trim()) {
       newErrors.name = 'Name is required';
@@ -132,7 +140,7 @@ const PersonForm = ({ person, onSubmit, onCancel, loading = false }) => {
    * 3. If valid, call onSubmit prop with form data
    * 4. Parent component handles API call
    */
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault(); // Prevent page reload
 
     // Validate
