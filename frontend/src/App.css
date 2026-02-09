@@ -403,53 +403,146 @@ body {
 }
 
 /* ===============================================
-   RESPONSIVE DESIGN
+   LOADING SPINNER COMPONENT
    =============================================== */
-@media (max-width: 768px) {
-  .app-header h1 {
-    font-size: 2rem;
-  }
-  
-  .list-header {
-    flex-direction: column;
-    gap: var(--spacing-md);
-    align-items: flex-start;
-  }
-  
-  .person-item {
-    flex-direction: column;
-    gap: var(--spacing-md);
-    align-items: flex-start;
-  }
-  
-  .person-actions {
-    width: 100%;
-  }
-  
-  .person-actions .btn {
-    flex: 1;
-  }
-  
-  .form-actions {
-    flex-direction: column;
-  }
-  
-  .form-actions .btn {
-    width: 100%;
-  }
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-lg);
 }
 
-@media (max-width: 480px) {
-  .App {
-    padding: var(--spacing-sm);
-  }
-  
-  .container {
-    padding: var(--spacing-sm);
-  }
-  
-  .person-form-container,
-  .persons-container {
-    padding: var(--spacing-md);
-  }
+.loading-fullscreen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.9);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.spinner-small {
+  width: 20px;
+  height: 20px;
+  border-width: 2px;
+}
+
+.spinner-medium {
+  width: 40px;
+  height: 40px;
+  border-width: 3px;
+}
+
+.spinner-large {
+  width: 60px;
+  height: 60px;
+  border-width: 4px;
+}
+
+.loading-message {
+  margin-top: var(--spacing-md);
+  color: var(--text-secondary);
+  font-size: 1rem;
+}
+
+/* ===============================================
+   OPTIMISTIC UPDATES
+   =============================================== */
+.person-item.optimistic {
+  opacity: 0.7;
+  position: relative;
+}
+
+.optimistic-indicator {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: var(--warning-color);
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--border-radius);
+  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  z-index: 10;
+}
+
+.optimistic-spinner {
+  width: 12px;
+  height: 12px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top: 2px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+/* ===============================================
+   LOADING OVERLAY
+   =============================================== */
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  border-radius: var(--border-radius);
+}
+
+.persons-container {
+  position: relative; /* For loading overlay positioning */
+}
+
+/* ===============================================
+   ERROR BOUNDARY
+   =============================================== */
+.error-boundary {
+  background: white;
+  padding: var(--spacing-lg);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-md);
+  max-width: 600px;
+  margin: var(--spacing-xl) auto;
+}
+
+.error-boundary h2 {
+  color: var(--danger-color);
+  margin-bottom: var(--spacing-md);
+  text-align: center;
+}
+
+.error-boundary details {
+  background: var(--bg-tertiary);
+  padding: var(--spacing-md);
+  border-radius: var(--border-radius);
+  margin: var(--spacing-md) 0;
+  text-align: left;
+}
+
+.error-boundary summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.error-boundary summary:hover {
+  color: var(--primary-color);
+}
+
+.error-actions {
+  display: flex;
+  gap: var(--spacing-md);
+  justify-content: center;
+  margin-top: var(--spacing-md);
 }

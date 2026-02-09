@@ -21,7 +21,7 @@
 
 import React from 'react';
 
-const PersonItem = ({ person, onEdit, onDelete }) => {
+const PersonItem = ({ person, onEdit, onDelete, isOptimistic = false }) => {
   /**
    * Handle delete with confirmation
    * 
@@ -38,7 +38,14 @@ const PersonItem = ({ person, onEdit, onDelete }) => {
   };
 
   return (
-    <div className="person-item">
+    <div className={`person-item ${isOptimistic ? 'optimistic' : ''}`}>
+      {isOptimistic && (
+        <div className="optimistic-indicator">
+          <div className="optimistic-spinner"></div>
+          <span>Updating...</span>
+        </div>
+      )}
+      
       <div className="person-info">
         {/* Person Details */}
         <div className="person-header">

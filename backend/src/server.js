@@ -46,7 +46,14 @@ const app = express();
  * - Browsers block requests between different origins by default
  * - CORS middleware allows our frontend to make requests to backend
  */
-app.use(cors());
+const allowedOrigins = process.env.CORS_ALLOWED_ORIGINS 
+  ? process.env.CORS_ALLOWED_ORIGINS.split(',').map(origin => origin.trim())
+  : ['http://localhost:3000'];
+
+app.use(cors({
+  origin: allowedOrigins,
+  credentials: process.env.CORS_CREDENTIALS === 'true'
+}));
 
 /**
  * Body Parser Middleware

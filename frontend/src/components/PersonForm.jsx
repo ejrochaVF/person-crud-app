@@ -22,7 +22,7 @@
 
 import React, { useState, useEffect } from 'react';
 
-const PersonForm = ({ person, onSubmit, onCancel }) => {
+const PersonForm = ({ person, onSubmit, onCancel, loading = false }) => {
   // State for form fields
   // This is a controlled component - React controls the input values
   const [formData, setFormData] = useState({

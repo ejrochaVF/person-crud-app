@@ -73,6 +73,52 @@ frontend/
 5. **personService** handles all API communication with the backend
 6. **State updates** reflect changes immediately in the UI
 
+## Configuration
+
+### Environment Variables
+
+The application uses environment variables for configuration. Create the following files in the `frontend/` directory:
+
+#### `.env.development` (Development)
+```bash
+REACT_APP_API_BASE_URL=http://localhost:5000
+REACT_APP_APP_NAME=Person CRUD App (Dev)
+REACT_APP_VERSION=1.0.0-dev
+REACT_APP_ENVIRONMENT=development
+```
+
+#### `.env.production` (Production)
+```bash
+REACT_APP_API_BASE_URL=https://your-api-domain.com
+REACT_APP_APP_NAME=Person CRUD Application
+REACT_APP_VERSION=1.0.0
+REACT_APP_ENVIRONMENT=production
+```
+
+#### `.env.example` (Template)
+Copy `.env.example` to create your environment files.
+
+### Configuration Structure
+
+All configuration is centralized in `src/config/appConfig.js`:
+
+```javascript
+const config = {
+  api: {
+    baseURL: process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000',
+    endpoints: { persons: '/api/persons' },
+    timeout: 10000
+  },
+  app: {
+    name: process.env.REACT_APP_APP_NAME || 'Person CRUD Application',
+    version: process.env.REACT_APP_VERSION || '1.0.0',
+    environment: process.env.REACT_APP_ENVIRONMENT || 'development'
+  },
+  features: { /* feature flags */ },
+  ui: { /* UI settings */ }
+};
+```
+
 ## Installation
 
 1. **Navigate to frontend directory:**

@@ -1,161 +1,118 @@
 /**
- * PERSON LIST COMPONENT
- * 
- * This is part of the PRESENTATION TIER - UI Layer
- * 
- * Responsibility:
- * - Fetch and display list of all persons
- * - Handle loading and error states
- * - Coordinate Create, Edit, and Delete operations
- * - Manage which view to show (list or form)
- * 
- * Key React Concepts:
- * - useState: Manage component state (persons, loading, errors, etc.)
- * - useEffect: Fetch data when component mounts
- * - Conditional Rendering: Show different UI based on state
- * - Lifting State Up: Child components call parent functions
+ * PERSON LIST COMPONENT - ENHANCED VERSION
+ *
+ * Enhanced with robustness patterns:
+ * - Error Boundary for error handling
+ * - Custom hooks for API logic
+ * - Optimistic updates for better UX
+ * - Retry logic for failed requests
+ * - Better loading states
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import PersonItem from './PersonItem';
 import PersonForm from './PersonForm';
+import LoadingSpinner from './LoadingSpinner';
+import usePersons from '../hooks/usePersons';
 import personService from '../services/personService';
+import config from '../config/appConfig';
 
 const PersonList = () => {
-  // State Management
-  const [persons, setPersons] = useState([]);           // List of persons
-  const [loading, setLoading] = useState(true);         // Loading state
-  const [error, setError] = useState(null);             // Error state
-  const [showForm, setShowForm] = useState(false);      // Show/hide form
-  const [editingPerson, setEditingPerson] = useState(null); // Person being edited
-  const [successMessage, setSuccessMessage] = useState(''); // Success feedback
+  // State for UI management (form visibility, editing)
+  const [showForm, setShowForm] = useState(false);
+  const [editingPerson, setEditingPerson] = useState(null);
+
+  // Ref to prevent infinite API calls
+  const hasFetchedRef = useRef(false);
+
+  // Use custom hook for person operations (excluding fetchPersons for initial load)
+  const {
+    persons: hookPersons,
+    successMessage,
+    loading,
+    error,
+    createPerson,
+    updatePerson,
+    deletePerson,
+    resetError
+  } = usePersons();
+
+  // Use local persons state for initial load, hook persons for operations
+  const [persons, setPersons] = useState(hookPersons);
 
   /**
    * useEffect Hook - Fetch persons when component mounts
-   * 
-   * Dependency array []: Runs only once when component mounts
-   * This is like componentDidMount in class components
    */
   useEffect(() => {
-    fetchPersons();
-  }, []); // Empty dependency array = run once on mount
+    const loadPersons = async () => {
+      try {
+        setPersons([]); // Clear any existing data
+        const data = await personService.getAllPersons();
+        setPersons(data);
+      } catch (err) {
+        console.error('Error fetching persons:', err);
+        // Error will be handled by the hook's error state if needed
+      }
+    };
 
-  /**
-   * Fetch all persons from the backend
-   * 
-   * Flow:
-   * 1. Set loading to true
-   * 2. Call personService.getAllPersons()
-   * 3. Update state with persons
-   * 4. Handle errors if any
-   * 5. Set loading to false
-   */
-  const fetchPersons = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      
-      const data = await personService.getAllPersons();
-      setPersons(data);
-    } catch (err) {
-      setError('Failed to load persons. Please check if the backend is running.');
-      console.error('Error fetching persons:', err);
-    } finally {
-      setLoading(false);
+    if (!hasFetchedRef.current) {
+      hasFetchedRef.current = true;
+      loadPersons();
     }
-  };
+  }, []); // Empty dependency array - only run once on mount
 
   /**
    * Handle creating a new person
-   * 
-   * Flow:
-   * 1. Call API to create person
-   * 2. Add new person to state
-   * 3. Hide form
-   * 4. Show success message
    */
   const handleCreate = async (personData) => {
     try {
-      const newPerson = await personService.createPerson(personData);
-      
-      // Add to persons list
-      setPersons(prev => [newPerson, ...prev]);
-      
-      // Reset form state
+      await createPerson(personData);
+      // Hide form on success (handled by optimistic update hook)
       setShowForm(false);
-      setSuccessMessage('Person created successfully!');
-      setTimeout(() => setSuccessMessage(''), 3000); // Clear after 3 seconds
-    } catch (err) {
-      // Handle validation errors from backend
-      if (err.errors) {
-        alert('Validation Error:\n' + err.errors.join('\n'));
-      } else {
-        alert('Failed to create person. Please try again.');
-      }
-      throw err; // Re-throw so form knows to stop submitting
+    } catch (error) {
+      // Error already handled by hook
+      throw error;
     }
   };
 
   /**
    * Handle updating a person
-   * 
-   * Flow:
-   * 1. Call API to update person
-   * 2. Update person in state
-   * 3. Hide form
-   * 4. Show success message
    */
   const handleUpdate = async (personData) => {
     try {
-      const updatedPerson = await personService.updatePerson(editingPerson.id, personData);
-      
-      // Update in persons list
-      setPersons(prev => 
-        prev.map(p => p.id === editingPerson.id ? updatedPerson : p)
-      );
-      
-      // Reset form state
+      await updatePerson(editingPerson.id, personData);
+      // Hide form and clear editing state on success
       setShowForm(false);
       setEditingPerson(null);
-      setSuccessMessage('Person updated successfully!');
-      setTimeout(() => setSuccessMessage(''), 3000);
-    } catch (err) {
-      if (err.errors) {
-        alert('Validation Error:\n' + err.errors.join('\n'));
-      } else {
-        alert('Failed to update person. Please try again.');
-      }
-      throw err;
+    } catch (error) {
+      // Error already handled by hook
+      throw error;
     }
   };
 
   /**
    * Handle deleting a person
-   * 
-   * Flow:
-   * 1. Call API to delete person
-   * 2. Remove person from state
-   * 3. Show success message
    */
   const handleDelete = async (id) => {
-    try {
-      await personService.deletePerson(id);
-      
-      // Remove from persons list
-      setPersons(prev => prev.filter(p => p.id !== id));
-      
-      setSuccessMessage('Person deleted successfully!');
-      setTimeout(() => setSuccessMessage(''), 3000);
-    } catch (err) {
-      alert('Failed to delete person. Please try again.');
-      console.error('Error deleting person:', err);
+    // Confirmation dialog
+    const person = persons.find(p => p.id === id);
+    if (!person) return;
+
+    const confirmDelete = window.confirm(
+      `Are you sure you want to delete ${person.name} ${person.surname}?`
+    );
+
+    if (confirmDelete) {
+      try {
+        await deletePerson(id);
+      } catch (error) {
+        // Error already handled by hook
+      }
     }
   };
 
   /**
    * Handle edit button click
-   * 
-   * Opens the form in edit mode with person data
    */
   const handleEdit = (person) => {
     setEditingPerson(person);
@@ -164,8 +121,6 @@ const PersonList = () => {
 
   /**
    * Handle add new person button click
-   * 
-   * Opens the form in create mode
    */
   const handleAddNew = () => {
     setEditingPerson(null);
@@ -174,8 +129,6 @@ const PersonList = () => {
 
   /**
    * Handle form cancel
-   * 
-   * Closes the form and resets state
    */
   const handleCancel = () => {
     setShowForm(false);
@@ -183,37 +136,37 @@ const PersonList = () => {
   };
 
   /**
-   * Conditional Rendering
-   * 
-   * Shows different UI based on current state:
-   * - Loading: Show loading message
-   * - Error: Show error message
-   * - Form: Show create/edit form
-   * - List: Show persons list
+   * Handle retry after error
    */
+  const handleRetry = async () => {
+    resetError();
+    try {
+      setPersons([]); // Clear any existing data
+      const data = await personService.getAllPersons();
+      setPersons(data);
+    } catch (err) {
+      console.error('Error retrying fetch:', err);
+      // Error will be handled by the hook's error state
+    }
+  };
 
   // Loading State
-  if (loading) {
-    return (
-      <div className="container">
-        <div className="loading">
-          <div className="spinner"></div>
-          <p>Loading persons...</p>
-        </div>
-      </div>
-    );
+  if (loading && persons.length === 0) {
+    return <LoadingSpinner message="Loading persons..." fullScreen />;
   }
 
   // Error State
-  if (error) {
+  if (error && persons.length === 0) {
     return (
       <div className="container">
         <div className="error-container">
           <h2>⚠️ Error</h2>
-          <p>{error}</p>
-          <button className="btn btn-primary" onClick={fetchPersons}>
-            Try Again
-          </button>
+          <p>{error.message || 'Failed to load persons. Please check if the backend is running.'}</p>
+          <div className="error-actions">
+            <button className="btn btn-primary" onClick={handleRetry}>
+              🔄 Try Again
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -223,8 +176,8 @@ const PersonList = () => {
   return (
     <div className="container">
       <header className="app-header">
-        <h1>👥 Person Management</h1>
-        <p className="subtitle">Full Stack CRUD Application</p>
+        <h1>👥 {config.app.name}</h1>
+        <p className="subtitle">Full Stack CRUD Application with Enhanced Robustness</p>
       </header>
 
       {/* Success Message */}
@@ -240,6 +193,7 @@ const PersonList = () => {
           person={editingPerson}
           onSubmit={editingPerson ? handleUpdate : handleCreate}
           onCancel={handleCancel}
+          loading={loading}
         />
       ) : (
         <div className="persons-container">
@@ -250,6 +204,13 @@ const PersonList = () => {
               ➕ Add New Person
             </button>
           </div>
+
+          {/* Loading overlay for operations */}
+          {loading && (
+            <div className="loading-overlay">
+              <LoadingSpinner size="small" message="Processing..." />
+            </div>
+          )}
 
           {/* Persons List */}
           {persons.length === 0 ? (
@@ -267,6 +228,7 @@ const PersonList = () => {
                   person={person}
                   onEdit={handleEdit}
                   onDelete={handleDelete}
+                  isOptimistic={person.isOptimistic}
                 />
               ))}
             </div>

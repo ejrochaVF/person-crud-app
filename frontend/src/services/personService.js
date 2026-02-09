@@ -22,10 +22,13 @@
  */
 
 import axios from 'axios';
+import config from '../config/appConfig';
 
-// Base URL for all API calls
-// In production, this would be an environment variable
-const API_URL = 'http://localhost:5000/api/persons';
+// Configure axios defaults
+axios.defaults.timeout = config.api.timeout;
+
+// Base URL for all API calls - now from config
+const API_URL = config.api.personsURL;
 
 /**
  * PersonService Object
