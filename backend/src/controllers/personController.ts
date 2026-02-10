@@ -41,6 +41,10 @@ export class PersonController extends BaseController {
   /**
    * GET /api/persons
    * Get all persons
+   * @route GET /api/persons
+   * @group Persons - Person management operations
+   * @returns {Object} 200 - Success response with persons list
+   * @returns {Error} 500 - Internal server error
    */
   getAllPersons = async (req: Request, res: Response): Promise<any> => {
     return this.executeAction(async () => {
@@ -57,6 +61,13 @@ export class PersonController extends BaseController {
   /**
    * GET /api/persons/:id
    * Get a single person by ID
+   * @route GET /api/persons/{id}
+   * @group Persons - Person management operations
+   * @param {number} id.path.required - Person ID
+   * @returns {Object} 200 - Success response with person data
+   * @returns {Error} 400 - Invalid ID format
+   * @returns {Error} 404 - Person not found
+   * @returns {Error} 500 - Internal server error
    */
   getPersonById = async (req: Request, res: Response): Promise<any> => {
     return this.executeAction(async () => {
@@ -76,6 +87,13 @@ export class PersonController extends BaseController {
   /**
    * POST /api/persons
    * Create a new person
+   * @route POST /api/persons
+   * @group Persons - Person management operations
+   * @param {PersonInput.model} person.body.required - Person data
+   * @returns {Object} 201 - Success response with created person
+   * @returns {Error} 400 - Validation error
+   * @returns {Error} 409 - Email already exists
+   * @returns {Error} 500 - Internal server error
    */
   createPerson = async (req: Request, res: Response): Promise<any> => {
     return this.executeAction(async () => {
@@ -97,6 +115,15 @@ export class PersonController extends BaseController {
   /**
    * PUT /api/persons/:id
    * Update an existing person
+   * @route PUT /api/persons/{id}
+   * @group Persons - Person management operations
+   * @param {number} id.path.required - Person ID
+   * @param {PersonInput.model} person.body.required - Updated person data
+   * @returns {Object} 200 - Success response with updated person
+   * @returns {Error} 400 - Invalid ID format or validation error
+   * @returns {Error} 404 - Person not found
+   * @returns {Error} 409 - Email already exists
+   * @returns {Error} 500 - Internal server error
    */
   updatePerson = async (req: Request, res: Response): Promise<any> => {
     return this.executeAction(async () => {
@@ -125,6 +152,13 @@ export class PersonController extends BaseController {
   /**
    * DELETE /api/persons/:id
    * Delete a person
+   * @route DELETE /api/persons/{id}
+   * @group Persons - Person management operations
+   * @param {number} id.path.required - Person ID
+   * @returns {Object} 200 - Success response
+   * @returns {Error} 400 - Invalid ID format
+   * @returns {Error} 404 - Person not found
+   * @returns {Error} 500 - Internal server error
    */
   deletePerson = async (req: Request, res: Response): Promise<any> => {
     return this.executeAction(async () => {
@@ -152,6 +186,18 @@ export class PersonController extends BaseController {
   /**
    * GET /api/persons/search
    * Search and filter persons
+   * @route GET /api/persons/search
+   * @group Persons - Person management operations
+   * @param {string} name.query - Search in name or surname
+   * @param {string} email.query - Search in email
+   * @param {string} phone.query - Search in phone
+   * @param {string} address.query - Search in address
+   * @param {string} createdAfter.query - Filter by creation date (after) - ISO date string
+   * @param {string} createdBefore.query - Filter by creation date (before) - ISO date string
+   * @param {number} page.query - Page number for pagination (default: 1)
+   * @param {number} limit.query - Items per page (default: 10, max: 100)
+   * @returns {Object} 200 - Success response with filtered persons
+   * @returns {Error} 500 - Internal server error
    */
   searchPersons = async (req: Request, res: Response): Promise<any> => {
     return this.executeAction(async () => {
@@ -194,6 +240,10 @@ export class PersonController extends BaseController {
   /**
    * GET /api/persons/incomplete
    * Get persons with incomplete profiles
+   * @route GET /api/persons/incomplete
+   * @group Persons - Person management operations
+   * @returns {Object} 200 - Success response with incomplete profiles
+   * @returns {Error} 500 - Internal server error
    */
   getIncompleteProfiles = async (req: Request, res: Response): Promise<any> => {
     return this.executeAction(async () => {

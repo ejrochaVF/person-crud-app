@@ -25,6 +25,9 @@ dotenv.config();
 // Import routes factory
 import personRoutesFactory from './routes/personRoutes';
 
+// Import Swagger configuration
+import { swaggerUi, swaggerUiOptions, swaggerSpec } from './config/swagger';
+
 // Import classes for manual instantiation
 // const { PersonController } = require('./controllers/personController');
 import { PersonService } from './services/personService';
@@ -101,6 +104,20 @@ const personRoutes = personRoutesFactory(personController);
 app.use('/api/persons', personRoutes);
 
 /**
+ * Swagger API Documentation
+ *
+ * Interactive API documentation powered by Swagger UI
+ * Access at: http://localhost:5000/api-docs
+ */
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, swaggerUiOptions));
+
+// Serve Swagger JSON specification
+app.get('/api-docs.json', (req, res) => {
+  res.setHeader('Content-Type', 'application/json');
+  res.send(swaggerSpec);
+});
+
+/**
  * Root Route
  *
  * Simple route to verify server is running
@@ -109,12 +126,15 @@ app.get('/', (req: Request, res: Response) => {
   res.json({
     message: 'Person CRUD API is running!',
     version: '1.0.0',
+    documentation: 'http://localhost:5000/api-docs',
     endpoints: {
       getAllPersons: 'GET /api/persons',
       getPersonById: 'GET /api/persons/:id',
       createPerson: 'POST /api/persons',
       updatePerson: 'PUT /api/persons/:id',
-      deletePerson: 'DELETE /api/persons/:id'
+      deletePerson: 'DELETE /api/persons/:id',
+      searchPersons: 'GET /api/persons/search',
+      getIncompleteProfiles: 'GET /api/persons/incomplete'
     }
   });
 });

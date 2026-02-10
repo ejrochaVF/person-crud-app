@@ -27,6 +27,14 @@ This is a complete **3-tier web application** built with **React + TypeScript** 
 - ✅ **Enhanced developer experience** - Better IntelliSense, refactoring, and compile-time error checking
 - ✅ **API routes activated** - Person CRUD endpoints now properly mounted and functional
 
+### API Documentation (February 2026)
+- ✅ **Swagger/OpenAPI integration** - Complete interactive API documentation
+- ✅ **Swagger UI** - Accessible at `http://localhost:5000/api-docs`
+- ✅ **OpenAPI 3.0 specification** - JSON spec available at `http://localhost:5000/api-docs.json`
+- ✅ **Detailed endpoint documentation** - All parameters, responses, and examples documented
+- ✅ **Schema definitions** - Person, PersonInput, Error, and other data models defined
+- ✅ **Try-it-out functionality** - Test API endpoints directly from the documentation
+
 ---
 
 ## 🏗️ Architecture Overview
@@ -237,6 +245,32 @@ npm start
 ```
 
 The frontend will open automatically in your browser at `http://localhost:3000`
+
+### Step 4: API Documentation
+
+Once both servers are running, you can access the interactive API documentation:
+
+**📚 Swagger UI Documentation**
+- **URL**: http://localhost:5000/api-docs
+- **Features**:
+  - Interactive API testing
+  - Complete endpoint documentation
+  - Request/response examples
+  - Schema definitions
+  - Try-it-out functionality
+
+**📄 OpenAPI JSON Specification**
+- **URL**: http://localhost:5000/api-docs.json
+- **Use this for**: Importing into other API tools, code generation, etc.
+
+**🔍 Available Endpoints**:
+- `GET /api/persons` - Get all persons
+- `GET /api/persons/:id` - Get person by ID
+- `POST /api/persons` - Create new person
+- `PUT /api/persons/:id` - Update person
+- `DELETE /api/persons/:id` - Delete person
+- `GET /api/persons/search` - Search with filters
+- `GET /api/persons/incomplete` - Get incomplete profiles
 
 ---
 
