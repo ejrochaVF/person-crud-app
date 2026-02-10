@@ -14,17 +14,20 @@
  * - This provides a higher-level abstraction over raw SQL
  */
 
-const { Sequelize } = require('sequelize');
-require('dotenv').config();
+import { Sequelize } from 'sequelize';
+import * as dotenv from 'dotenv';
+
+// Load environment variables
+dotenv.config();
 
 // Create Sequelize instance
 const sequelize = new Sequelize(
-  process.env.DB_NAME,
-  process.env.DB_USER,
-  process.env.DB_PASSWORD,
+  process.env.DB_NAME!,
+  process.env.DB_USER!,
+  process.env.DB_PASSWORD!,
   {
-    host: process.env.DB_HOST,
-    port: process.env.DB_PORT || 3306,
+    host: process.env.DB_HOST!,
+    port: parseInt(process.env.DB_PORT || '3306'),
     dialect: 'mysql',
     logging: false, // Set to console.log to see SQL queries
     pool: {
@@ -41,9 +44,9 @@ sequelize.authenticate()
   .then(() => {
     console.log('✅ Database connected successfully with Sequelize');
   })
-  .catch(err => {
+  .catch((err: Error) => {
     console.error('❌ Database connection failed:', err.message);
     process.exit(1);
   });
 
-module.exports = sequelize;
+export default sequelize;

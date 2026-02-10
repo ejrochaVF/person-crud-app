@@ -1,28 +1,38 @@
 /**
  * PERSON ROUTES
- * 
+ *
  * This file defines the API endpoints (routes) for Person operations
- * 
+ *
  * Purpose:
  * - Map HTTP methods and URLs to controller functions
  * - Define the API structure
- * 
+ *
  * RESTful API Design:
  * - GET    /api/persons      -> Get all persons
  * - GET    /api/persons/:id  -> Get one person
  * - POST   /api/persons      -> Create new person
  * - PUT    /api/persons/:id  -> Update person
  * - DELETE /api/persons/:id  -> Delete person
- * 
+ *
  * Key Concepts:
  * - Routes are the entry points to your API
  * - They map URLs to controller functions
  * - Express Router allows modular route handling
  */
 
-const express = require('express');
+import express, { Router } from 'express';
 
-module.exports = (personController) => {
+interface PersonController {
+  getAllPersons: any;
+  getPersonById: any;
+  createPerson: any;
+  updatePerson: any;
+  deletePerson: any;
+  searchPersons: any;
+  getIncompleteProfiles: any;
+}
+
+export default (personController: PersonController): Router => {
   const router = express.Router();
 
 /**
@@ -82,5 +92,5 @@ router.get('/search', personController.searchPersons);
  */
 router.get('/incomplete', personController.getIncompleteProfiles);
 
-return router;
+  return router;
 };

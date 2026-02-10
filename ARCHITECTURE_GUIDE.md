@@ -61,9 +61,9 @@ User clicks "Add Person"
 ```
 backend/src/
 ├── controllers/
-│   └── personController.js  # Business logic & request handling
+│   └── personController.ts  # Business logic & request handling
 └── routes/
-    └── personRoutes.js      # API endpoint definitions
+    └── personRoutes.ts      # API endpoint definitions
 ```
 
 **Example Flow:**
@@ -95,9 +95,9 @@ POST /api/persons request arrives
 ```
 backend/src/
 ├── models/
-│   └── personModel.js    # Database operations
+│   └── personModel.ts    # Database operations
 └── config/
-    └── database.js       # Database connection
+    └── database.ts       # Database connection
 ```
 
 **Example Flow:**
@@ -133,7 +133,7 @@ Let's trace a complete **CREATE** operation:
 │    Request hits /api/persons route                             │
 └─────────────────────────────────────────────────────────────────┘
                            ↓
-         personRoutes.js: router.post('/', ...)
+         personRoutes.ts: router.post('/', ...)
                            ↓
          Calls personController.createPerson(req, res)
                            ↓

@@ -15,39 +15,39 @@
  * - CORS: Allows frontend (different port) to communicate with backend
  */
 
-const express = require('express');
-const cors = require('cors');
-require('dotenv').config();
+import express, { Application, Request, Response, NextFunction } from 'express';
+import cors from 'cors';
+const dotenv = require('dotenv');
 
-// Import DI container (commented out for manual instantiation)
-// const container = require('./di/container');
+// Load environment variables
+dotenv.config();
 
 // Import routes factory
-const personRoutesFactory = require('./routes/personRoutes');
+import personRoutesFactory from './routes/personRoutes';
 
 // Import classes for manual instantiation
-const PersonController = require('./controllers/personController');
-const PersonService = require('./services/personService');
-const PersonRepository = require('./repositories/personRepository');
-const Person = require('./models/personModel');
+// const { PersonController } = require('./controllers/personController');
+import { PersonService } from './services/personService';
+import { PersonController } from './controllers/personController';
+import PersonRepository from './repositories/personRepository';
+import Person from './models/personModel';
 
 // Initialize Express app
-const app = express();
-
+const app: Application = express();
 // Middleware Configuration
 // ========================
 
 /**
  * CORS (Cross-Origin Resource Sharing)
- * 
+ *
  * Why needed:
  * - Frontend runs on http://localhost:3000
  * - Backend runs on http://localhost:5000
  * - Browsers block requests between different origins by default
  * - CORS middleware allows our frontend to make requests to backend
  */
-const allowedOrigins = process.env.CORS_ALLOWED_ORIGINS 
-  ? process.env.CORS_ALLOWED_ORIGINS.split(',').map(origin => origin.trim())
+const allowedOrigins: string[] = process.env.CORS_ALLOWED_ORIGINS
+  ? process.env.CORS_ALLOWED_ORIGINS.split(',').map((origin: string) => origin.trim())
   : ['http://localhost:3000'];
 
 app.use(cors({
@@ -57,11 +57,11 @@ app.use(cors({
 
 /**
  * Body Parser Middleware
- * 
+ *
  * Purpose:
  * - Parses incoming JSON request bodies
  * - Makes data available in req.body
- * 
+ *
  * Example: When frontend sends { "name": "John" }
  * This middleware allows us to access it as req.body.name
  */
@@ -69,7 +69,7 @@ app.use(express.json());
 
 /**
  * URL-encoded Parser
- * 
+ *
  * Purpose:
  * - Parses URL-encoded data (form submissions)
  * - extended: true allows for rich objects and arrays
@@ -77,7 +77,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Request Logging Middleware (helpful for debugging)
-app.use((req, res, next) => {
+app.use((req: Request, res: Response, next: NextFunction) => {
   console.log(`${req.method} ${req.path}`);
   next();
 });
@@ -85,9 +85,12 @@ app.use((req, res, next) => {
 // Routes Configuration
 // ===================
 
+// Routes Configuration
+// ===================
+
 /**
  * API Routes
- * 
+ *
  * All person-related routes are prefixed with /api/persons
  * Example: POST /api/persons, GET /api/persons/:id, etc.
  */
@@ -99,10 +102,10 @@ app.use('/api/persons', personRoutes);
 
 /**
  * Root Route
- * 
+ *
  * Simple route to verify server is running
  */
-app.get('/', (req, res) => {
+app.get('/', (req: Request, res: Response) => {
   res.json({
     message: 'Person CRUD API is running!',
     version: '1.0.0',
@@ -118,10 +121,10 @@ app.get('/', (req, res) => {
 
 /**
  * 404 Handler
- * 
+ *
  * Catches all requests that don't match any routes
  */
-app.use((req, res) => {
+app.use((req: Request, res: Response) => {
   res.status(404).json({
     success: false,
     message: 'Route not found',
@@ -131,10 +134,10 @@ app.use((req, res) => {
 
 /**
  * Global Error Handler
- * 
+ *
  * Catches any errors that occur in the application
  */
-app.use((err, req, res, next) => {
+app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   console.error('Global error handler:', err);
   res.status(500).json({
     success: false,
@@ -146,7 +149,7 @@ app.use((err, req, res, next) => {
 // Start Server
 // ============
 
-const PORT = process.env.PORT || 5000;
+const PORT: string | number = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
   console.log('=================================');
@@ -156,4 +159,4 @@ app.listen(PORT, () => {
   console.log('=================================');
 });
 
-module.exports = app;
+export default app;

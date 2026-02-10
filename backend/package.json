@@ -2,10 +2,13 @@
   "name": "person-crud-backend",
   "version": "1.0.0",
   "description": "Node.js backend for Person CRUD application - Learning Project",
-  "main": "src/server.js",
+  "main": "dist/server.js",
   "scripts": {
-    "start": "node src/server.js",
-    "dev": "nodemon src/server.js"
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "dev": "ts-node src/server.ts",
+    "dev:watch": "ts-node --watch src/server.ts",
+    "clean": "rimraf dist"
   },
   "keywords": [
     "nodejs",
@@ -25,6 +28,13 @@
     "sequelize": "^6.37.7"
   },
   "devDependencies": {
-    "nodemon": "^3.0.1"
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/node": "^25.2.2",
+    "concurrently": "^9.2.1",
+    "nodemon": "^3.1.11",
+    "rimraf": "^6.1.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
   }
 }

@@ -17,7 +17,6 @@
 import React from 'react';
 import PersonList from './components/PersonList';
 import ErrorBoundary from './components/ErrorBoundary';
-import config from './config/appConfig';
 import './App.css';
 
 function App() {

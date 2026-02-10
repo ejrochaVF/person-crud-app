@@ -12,7 +12,8 @@
  * - Handles cross-cutting HTTP concerns
  */
 
-const { BusinessError, ValidationError, NotFoundError, ConflictError, ForbiddenError } = require('../common/errors');
+import { Response } from 'express';
+import { BusinessError, ValidationError, NotFoundError, ConflictError, ForbiddenError } from '../common/errors';
 
 /**
  * Sanitize input data (HTTP layer concern)
@@ -21,10 +22,10 @@ const { BusinessError, ValidationError, NotFoundError, ConflictError, ForbiddenE
  * @param {Object} data - Raw input data
  * @returns {Object} Sanitized data
  */
-const sanitizeInput = (data) => {
+const sanitizeInput = (data: any): any => {
   if (!data || typeof data !== 'object') return {};
 
-  const sanitized = {};
+  const sanitized: any = {};
   for (const [key, value] of Object.entries(data)) {
     if (typeof value === 'string') {
       sanitized[key] = value.trim();
@@ -41,7 +42,7 @@ const sanitizeInput = (data) => {
  * @param {Error} error - Error from service layer
  * @param {Object} res - Express response object
  */
-const handleBusinessError = (error, res) => {
+const handleBusinessError = (error: Error, res: Response): Response => {
   if (error instanceof ValidationError) {
     // Validation errors -> HTTP 400 (Bad Request)
     return res.status(400).json({
@@ -108,8 +109,8 @@ const handleBusinessError = (error, res) => {
  * @param {string} errorCode - Business error code
  * @returns {number} HTTP status code
  */
-const getHttpStatusForBusinessError = (errorCode) => {
-  const statusMap = {
+const getHttpStatusForBusinessError = (errorCode: string): number => {
+  const statusMap: { [key: string]: number } = {
     'VALIDATION_ERROR': 400,
     'DUPLICATE_EMAIL': 409,
     'NOT_FOUND': 404,
@@ -135,7 +136,7 @@ const getHttpStatusForBusinessError = (errorCode) => {
  * @param {string} id - ID parameter from request
  * @returns {number|null} Parsed ID or null if invalid
  */
-const validateIdParameter = (id) => {
+const validateIdParameter = (id: string): number | null => {
   const parsedId = parseInt(id);
   return isNaN(parsedId) ? null : parsedId;
 };
@@ -147,8 +148,8 @@ const validateIdParameter = (id) => {
  * @param {Object} data - Response data
  * @param {number} statusCode - HTTP status code (default: 200)
  */
-const sendSuccessResponse = (res, data, statusCode = 200) => {
-  res.status(statusCode).json({
+const sendSuccessResponse = (res: Response, data: any, statusCode: number = 200): Response => {
+  return res.status(statusCode).json({
     success: true,
     ...data
   });
@@ -162,8 +163,8 @@ const sendSuccessResponse = (res, data, statusCode = 200) => {
  * @param {number} statusCode - HTTP status code (default: 400)
  * @param {string} code - Error code
  */
-const sendErrorResponse = (res, message, statusCode = 400, code = null) => {
-  const response = {
+const sendErrorResponse = (res: Response, message: string, statusCode: number = 400, code: string | null = null): Response => {
+  const response: any = {
     success: false,
     message
   };
@@ -172,10 +173,10 @@ const sendErrorResponse = (res, message, statusCode = 400, code = null) => {
     response.code = code;
   }
 
-  res.status(statusCode).json(response);
+  return res.status(statusCode).json(response);
 };
 
-class BaseController {
+export class BaseController {
   /**
    * Execute controller action with error handling
    *
@@ -183,11 +184,11 @@ class BaseController {
    * @param {Object} res - Express response object
    * @returns {Promise} Result of the action
    */
-  async executeAction(action, res) {
+  async executeAction(action: () => Promise<any>, res: Response): Promise<any> {
     try {
       return await action();
     } catch (error) {
-      handleBusinessError(error, res);
+      handleBusinessError(error as Error, res);
     }
   }
 
@@ -197,7 +198,7 @@ class BaseController {
    * @param {Object} data - Raw input data
    * @returns {Object} Sanitized data
    */
-  sanitizeInput(data) {
+  sanitizeInput(data: any): any {
     return sanitizeInput(data);
   }
 
@@ -207,7 +208,7 @@ class BaseController {
    * @param {string} id - ID parameter
    * @returns {number|null} Validated ID or null
    */
-  validateId(id) {
+  validateId(id: string): number | null {
     return validateIdParameter(id);
   }
 
@@ -218,8 +219,8 @@ class BaseController {
    * @param {Object} data - Response data
    * @param {number} statusCode - HTTP status code
    */
-  sendSuccess(res, data, statusCode = 200) {
-    sendSuccessResponse(res, data, statusCode);
+  sendSuccess(res: Response, data: any, statusCode: number = 200): Response {
+    return sendSuccessResponse(res, data, statusCode);
   }
 
   /**
@@ -230,8 +231,8 @@ class BaseController {
    * @param {number} statusCode - HTTP status code
    * @param {string} code - Error code
    */
-  sendError(res, message, statusCode = 400, code = null) {
-    sendErrorResponse(res, message, statusCode, code);
+  sendError(res: Response, message: string, statusCode: number = 400, code: string | null = null): Response {
+    return sendErrorResponse(res, message, statusCode, code);
   }
 
   /**
@@ -240,13 +241,12 @@ class BaseController {
    * @param {Error} error - Business error
    * @param {Object} res - Express response object
    */
-  handleError(error, res) {
-    handleBusinessError(error, res);
+  handleError(error: Error, res: Response): Response {
+    return handleBusinessError(error, res);
   }
 }
 
-module.exports = {
-  BaseController,
+export {
   sanitizeInput,
   handleBusinessError,
   getHttpStatusForBusinessError,

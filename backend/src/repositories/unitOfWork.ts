@@ -10,9 +10,17 @@
  * - Ensures data integrity across operations
  */
 
-const sequelize = require('../config/database');
+import { Transaction } from 'sequelize';
+import sequelize from '../config/database';
+
+interface RepositoryConstructor {
+  new (...args: any[]): any;
+}
 
 class UnitOfWork {
+  private transaction: Transaction | null;
+  private repositories: { [key: string]: any };
+
   constructor() {
     this.transaction = null;
     this.repositories = {};
@@ -22,7 +30,7 @@ class UnitOfWork {
    * Start a new transaction
    * @returns {Promise<void>}
    */
-  async beginTransaction() {
+  async beginTransaction(): Promise<void> {
     this.transaction = await sequelize.transaction();
   }
 
@@ -30,7 +38,7 @@ class UnitOfWork {
    * Commit the current transaction
    * @returns {Promise<void>}
    */
-  async commit() {
+  async commit(): Promise<void> {
     if (this.transaction) {
       await this.transaction.commit();
       this.transaction = null;
@@ -41,7 +49,7 @@ class UnitOfWork {
    * Rollback the current transaction
    * @returns {Promise<void>}
    */
-  async rollback() {
+  async rollback(): Promise<void> {
     if (this.transaction) {
       await this.transaction.rollback();
       this.transaction = null;
@@ -54,9 +62,9 @@ class UnitOfWork {
    *
    * @param {Function} operation - Function to execute within transaction
    * @returns {Promise<any>} Result of the operation
-   * 
+   *
    * Usage example:
-   * 
+   *
    * await uow.executeInTransaction(async (work) => {
    *     const userRepo = work.getRepository('users', UserRepository);
    *     const orderRepo = work.getRepository('orders', OrderRepository);
@@ -65,7 +73,7 @@ class UnitOfWork {
    *     await orderRepo.create({ userId: user.id, total: 100 });
    * });
    */
-  async executeInTransaction(operation) {
+  async executeInTransaction<T>(operation: (work: UnitOfWork) => Promise<T>): Promise<T> {
     try {
       await this.beginTransaction();
       const result = await operation(this);
@@ -84,7 +92,7 @@ class UnitOfWork {
    * @param {BaseRepository} RepositoryClass - Repository class
    * @returns {BaseRepository} Repository instance with transaction
    */
-  getRepository(repositoryName, RepositoryClass) {
+  getRepository(repositoryName: string, RepositoryClass: RepositoryConstructor): any {
     if (!this.repositories[repositoryName]) {
       this.repositories[repositoryName] = new RepositoryClass();
       // Inject transaction into repository if it supports it
@@ -96,4 +104,4 @@ class UnitOfWork {
   }
 }
 
-module.exports = UnitOfWork;
+export default UnitOfWork;

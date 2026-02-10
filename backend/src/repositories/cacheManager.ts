@@ -11,7 +11,15 @@
  * - Cache invalidation
  */
 
+interface CacheItem {
+  value: any;
+  expiry: number;
+}
+
 class CacheManager {
+  private cache: Map<string, CacheItem>;
+  private defaultTTL: number;
+
   constructor() {
     this.cache = new Map(); // Simple in-memory cache
     this.defaultTTL = 300000; // 5 minutes in milliseconds
@@ -21,13 +29,13 @@ class CacheManager {
    * Generate cache key from parameters
    *
    * @param {string} prefix - Cache key prefix
-   * @param {Object} params - Parameters to include in key
+   * @param {any} params - Parameters to include in key
    * @returns {string} Cache key
    */
-  generateKey(prefix, params = {}) {
+  generateKey(prefix: string, params: any = {}): string {
     const sortedParams = Object.keys(params)
       .sort()
-      .reduce((result, key) => {
+      .reduce((result: any, key: string) => {
         result[key] = params[key];
         return result;
       }, {});
@@ -41,7 +49,7 @@ class CacheManager {
    * @param {string} key - Cache key
    * @returns {any|null} Cached value or null if not found/expired
    */
-  get(key) {
+  get(key: string): any | null {
     const item = this.cache.get(key);
     if (!item) return null;
 
@@ -61,7 +69,7 @@ class CacheManager {
    * @param {any} value - Value to cache
    * @param {number} ttl - Time to live in milliseconds
    */
-  set(key, value, ttl = this.defaultTTL) {
+  set(key: string, value: any, ttl: number = this.defaultTTL): void {
     const expiry = Date.now() + ttl;
     this.cache.set(key, { value, expiry });
   }
@@ -71,14 +79,14 @@ class CacheManager {
    *
    * @param {string} key - Cache key
    */
-  delete(key) {
+  delete(key: string): void {
     this.cache.delete(key);
   }
 
   /**
    * Clear all cache
    */
-  clear() {
+  clear(): void {
     this.cache.clear();
   }
 
@@ -87,7 +95,7 @@ class CacheManager {
    *
    * @param {string} pattern - Pattern to match (simple string matching)
    */
-  deleteByPattern(pattern) {
+  deleteByPattern(pattern: string): void {
     for (const key of this.cache.keys()) {
       if (key.includes(pattern)) {
         this.cache.delete(key);
@@ -100,7 +108,7 @@ class CacheManager {
    *
    * @returns {Object} Cache statistics
    */
-  getStats() {
+  getStats(): { totalEntries: number; validEntries: number; expiredEntries: number; hitRate: number } {
     const now = Date.now();
     let validEntries = 0;
     let expiredEntries = 0;
@@ -122,4 +130,4 @@ class CacheManager {
   }
 }
 
-module.exports = new CacheManager();
+export default new CacheManager();

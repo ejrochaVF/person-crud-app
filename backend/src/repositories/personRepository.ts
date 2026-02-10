@@ -14,10 +14,54 @@
  * - Overrides error handling for Person-specific constraints
  */
 
-const BaseRepository = require('./baseRepository');
+import BaseRepository from './baseRepository';
+import { Model } from 'sequelize';
+
+interface PersonData {
+  name: string;
+  surname: string;
+  email: string;
+  phone?: string;
+  address?: string;
+  displayName?: string;
+}
+
+interface SearchFilters {
+  name?: string;
+  email?: string;
+  phone?: string;
+  address?: string;
+  createdAfter?: Date;
+  createdBefore?: Date;
+}
+
+interface SearchOptions {
+  order?: any[][];
+  page?: number;
+  limit?: number;
+}
+
+interface PaginationResult {
+  data: any[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+    hasNext: boolean;
+    hasPrev: boolean;
+  };
+}
+
+interface PersonStatistics {
+  totalPersons: number;
+  withPhone: number;
+  withAddress: number;
+  avgNameLength: string;
+}
 
 class PersonRepository extends BaseRepository {
-  constructor(PersonModel) {
+  constructor(PersonModel: any) {
     super(PersonModel); // Pass the injected Person model to the base class
   }
 
@@ -27,9 +71,9 @@ class PersonRepository extends BaseRepository {
    *
    * @param {Error} error - Database error
    */
-  handleUniqueConstraintError(error) {
+  handleUniqueConstraintError(error: Error): void {
     if (error.name === 'SequelizeUniqueConstraintError') {
-      const duplicateError = new Error('Email already exists');
+      const duplicateError = new Error('Email already exists') as any;
       duplicateError.code = 'DUPLICATE_EMAIL';
       throw duplicateError;
     }
@@ -44,7 +88,7 @@ class PersonRepository extends BaseRepository {
    * @param {Object} options - Sequelize find options
    * @returns {Promise<Array>} Array of person records ordered by name
    */
-  async findAll(options = {}) {
+  async findAll(options: any = {}): Promise<any[]> {
     try {
       // Merge options with our custom ordering
       const customOptions = {
@@ -69,7 +113,7 @@ class PersonRepository extends BaseRepository {
    * @param {Object} personData - Person data to create
    * @returns {Promise<Object>} Created person object
    */
-  async create(personData) {
+  async create(personData: PersonData): Promise<any> {
     try {
       // Add custom logic before calling parent
       const dataWithDisplayName = {
@@ -82,7 +126,7 @@ class PersonRepository extends BaseRepository {
     } catch (error) {
       // Custom error handling for Person creation
       if (error.message.includes('displayName')) {
-        const customError = new Error('Invalid person data');
+        const customError = new Error('Invalid person data') as any;
         customError.code = 'PERSON_VALIDATION_ERROR';
         throw customError;
       }
@@ -97,7 +141,7 @@ class PersonRepository extends BaseRepository {
    * @param {Object} personData - Updated person data
    * @returns {Promise<Object|null>} Updated person or null if not found
    */
-  async update(id, personData) {
+  async update(id: number, personData: Partial<PersonData>): Promise<any | null> {
     try {
       // Get the original person for audit logging
       const originalPerson = await this.findById(id);
@@ -135,12 +179,11 @@ class PersonRepository extends BaseRepository {
    * @param {number} excludeId - Optional ID to exclude (for updates)
    * @returns {Promise<boolean>} True if email exists
    */
-  async emailExists(email, excludeId = null) {
+  async emailExists(email: string, excludeId: number | null = null): Promise<boolean> {
     try {
       const { Op } = require('sequelize');
-      const sequelize = require('../config/database');
 
-      const whereClause = { email };
+      const whereClause: any = { email };
       if (excludeId) {
         whereClause.id = { [Op.ne]: excludeId };
       }
@@ -158,7 +201,7 @@ class PersonRepository extends BaseRepository {
    * @param {string} searchTerm - Search term for name or surname
    * @returns {Promise<Array>} Array of matching person objects
    */
-  async findByName(searchTerm) {
+  async findByName(searchTerm: string): Promise<any[]> {
     try {
       const { Op } = require('sequelize');
 
@@ -179,7 +222,7 @@ class PersonRepository extends BaseRepository {
    *
    * @returns {Promise<Array>} Array of persons with full names
    */
-  async findAllWithFullNames() {
+  async findAllWithFullNames(): Promise<any[]> {
     try {
       const persons = await this.model.findAll({
         order: [['created_at', 'DESC']]
@@ -202,7 +245,7 @@ class PersonRepository extends BaseRepository {
    * @param {Array} personsData - Array of person data objects
    * @returns {Promise<Array>} Array of created persons
    */
-  async bulkCreate(personsData) {
+  async bulkCreate(personsData: PersonData[]): Promise<any[]> {
     try {
       const persons = await this.model.bulkCreate(personsData, {
         validate: true, // Run validations
@@ -229,10 +272,10 @@ class PersonRepository extends BaseRepository {
    * @param {Object} options - Additional options (pagination, sorting)
    * @returns {Promise<Array|Object>} Search results or paginated results
    */
-  async searchPersons(filters = {}, options = {}) {
+  async searchPersons(filters: SearchFilters = {}, options: SearchOptions = {}): Promise<any[] | PaginationResult> {
     try {
       const { Op } = require('sequelize');
-      const whereConditions = [];
+      const whereConditions: any[] = [];
 
       // Build where conditions based on filters
       if (filters.name) {
@@ -282,8 +325,8 @@ class PersonRepository extends BaseRepository {
 
       // Check if pagination is requested
       if (options.page && options.limit) {
-        const page = parseInt(options.page) || 1;
-        const limit = parseInt(options.limit) || 10;
+        const page = parseInt(options.page.toString()) || 1;
+        const limit = parseInt(options.limit.toString()) || 10;
         const offset = (page - 1) * limit;
 
         const { count, rows } = await this.model.findAndCountAll({
@@ -326,7 +369,7 @@ class PersonRepository extends BaseRepository {
    *
    * @returns {Promise<Array>} Persons with incomplete profiles
    */
-  async findIncompleteProfiles() {
+  async findIncompleteProfiles(): Promise<any[]> {
     try {
       const { Op } = require('sequelize');
 
@@ -354,10 +397,9 @@ class PersonRepository extends BaseRepository {
    *
    * @returns {Promise<Object>} Statistics object
    */
-  async getStatistics() {
+  async getStatistics(): Promise<PersonStatistics> {
     try {
       const sequelize = require('../config/database');
-      const { Op } = require('sequelize');
 
       const [results] = await sequelize.query(`
         SELECT
@@ -380,4 +422,4 @@ class PersonRepository extends BaseRepository {
   }
 }
 
-module.exports = PersonRepository;
+export default PersonRepository;

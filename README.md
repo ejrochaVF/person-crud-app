@@ -2,21 +2,30 @@
 
 ## 🎯 Project Overview
 
-This is a complete **3-tier web application** built with React (frontend) and Node.js (backend) to teach you modern full-stack development. The application implements a simple CRUD (Create, Read, Update, Delete) for managing Person entities.
+This is a complete **3-tier web application** built with **React + TypeScript** (frontend) and **Node.js + TypeScript** (backend) to teach you modern full-stack development. The application implements a simple CRUD (Create, Read, Update, Delete) for managing Person entities.
 
 ## 📚 What You'll Learn
 
 1. **3-Tier Architecture**: Clear separation between Presentation, Business Logic, and Data Access layers
 2. **RESTful API Design**: How to design and consume REST APIs
-3. **React Frontend**: Modern React with hooks, component patterns, and state management
-4. **Node.js Backend**: Express.js server with proper routing and middleware
-5. **ORM Integration**: Sequelize ORM for database operations and model management
-6. **Repository Pattern**: Clean data access layer with BaseRepository and specific repositories
-7. **Dependency Injection**: Using Awilix for managing dependencies and testability
-8. **Unit of Work Pattern**: Managing database transactions across multiple operations
-9. **Project Structure**: Industry best practices for organizing code
-10. **Error Handling**: Proper error handling across all tiers
-11. **Development Workflow**: How to run and develop both projects simultaneously
+3. **React + TypeScript Frontend**: Modern React with hooks, component patterns, state management, and type safety
+4. **Node.js + TypeScript Backend**: Express.js server with proper routing, middleware, and TypeScript types
+5. **TypeScript Integration**: Full-stack TypeScript development with proper typing and interfaces
+6. **ORM Integration**: Sequelize ORM for database operations and model management
+7. **Repository Pattern**: Clean data access layer with BaseRepository and specific repositories
+8. **Dependency Injection**: Using Awilix for managing dependencies and testability
+9. **Unit of Work Pattern**: Managing database transactions across multiple operations
+10. **Project Structure**: Industry best practices for organizing code
+11. **Error Handling**: Proper error handling across all tiers
+12. **Development Workflow**: How to run and develop both projects simultaneously
+
+## 📈 Recent Updates
+
+### TypeScript Migration (February 2026)
+- ✅ **Backend fully converted to TypeScript** - All `.js` files converted to `.ts` with proper type annotations
+- ✅ **Type safety across all layers** - Controllers, services, repositories, models, and routes now use TypeScript
+- ✅ **Enhanced developer experience** - Better IntelliSense, refactoring, and compile-time error checking
+- ✅ **API routes activated** - Person CRUD endpoints now properly mounted and functional
 
 ---
 
@@ -87,28 +96,28 @@ person-crud-app/
 ├── backend/                     # Node.js Application
 │   ├── src/
 │   │   ├── config/             # Configuration
-│   │   │   └── database.js     # Database connection (Sequelize)
+│   │   │   └── database.ts     # Database connection (Sequelize)
 │   │   ├── controllers/        # Presentation Tier - Request Handlers
-│   │   │   ├── baseController.js # Common HTTP functionality
-│   │   │   └── personController.js
+│   │   │   ├── baseController.ts # Common HTTP functionality
+│   │   │   └── personController.ts
 │   │   ├── models/             # Domain Layer - Sequelize Models
-│   │   │   └── personModel.js
+│   │   │   └── personModel.ts
 │   │   ├── repositories/       # Data Access Tier - Repository Pattern
-│   │   │   ├── baseRepository.js # Generic CRUD operations
-│   │   │   ├── personRepository.js # Person-specific operations
-│   │   │   ├── cacheManager.js # Caching for performance
-│   │   │   └── unitOfWork.js   # Transaction management
+│   │   │   ├── baseRepository.ts # Generic CRUD operations
+│   │   │   ├── personRepository.ts # Person-specific operations
+│   │   │   ├── cacheManager.ts # Caching for performance
+│   │   │   └── unitOfWork.ts   # Transaction management
 │   │   ├── services/           # Business Logic Tier - Domain Services
-│   │   │   ├── personService.js # Person business logic
+│   │   │   ├── personService.ts # Person business logic
 │   │   │   └── README.md
 │   │   ├── routes/             # API Routes Definition
-│   │   │   └── personRoutes.js
+│   │   │   └── personRoutes.ts
 │   │   ├── common/             # Shared utilities
-│   │   │   ├── errors.js       # Custom error classes
+│   │   │   ├── errors.ts       # Custom error classes
 │   │   │   └── README.md
 │   │   ├── di/                 # Dependency Injection
-│   │   │   └── container.js    # Awilix container configuration
-│   │   └── server.js           # Express app setup & entry point
+│   │   │   └── container.ts    # Awilix container configuration
+│   │   └── server.ts           # Express app setup & entry point
 │   ├── package.json
 │   ├── .env.example            # Environment variables template
 │   └── README.md
@@ -189,7 +198,7 @@ INSERT INTO persons (name, surname, email, address, phone) VALUES
 ('Bob', 'Johnson', 'bob.johnson@email.com', '789 Pine Rd', '555-0103');
 ```
 
-**Note**: The application uses Sequelize ORM to interact with the database. The table structure is defined in `backend/src/models/personModel.js`, and all database operations go through the Repository layer.
+**Note**: The application uses Sequelize ORM to interact with the database. The table structure is defined in `backend/src/models/personModel.ts`, and all database operations go through the Repository layer.
 
 ### Step 2: Backend Setup
 
@@ -238,7 +247,7 @@ The frontend will open automatically in your browser at `http://localhost:3000`
 #### CREATE (Add Person)
 1. **Frontend**: User fills form → `PersonForm.jsx` component
 2. **Frontend**: Form submission → `personService.createPerson()` makes POST request
-3. **Backend**: Request hits `POST /api/persons` → `personRoutes.js`
+3. **Backend**: Request hits `POST /api/persons` → `personRoutes.ts`
 4. **Backend**: Route calls `personController.createPerson()`
 5. **Backend**: Controller delegates to `personService.createPerson()` (business logic)
 6. **Backend**: Service validates business rules and calls `personRepository.create()`
@@ -250,7 +259,7 @@ The frontend will open automatically in your browser at `http://localhost:3000`
 #### READ (Get All Persons)
 1. **Frontend**: Component mounts → `PersonList.jsx` useEffect hook
 2. **Frontend**: `personService.getAllPersons()` makes GET request
-3. **Backend**: Request hits `GET /api/persons` → `personRoutes.js`
+3. **Backend**: Request hits `GET /api/persons` → `personRoutes.ts`
 4. **Backend**: Route calls `personController.getAllPersons()`
 5. **Backend**: Controller delegates to `personService.getAllPersons()` (business logic)
 6. **Backend**: Service calls `personRepository.findAll()` with caching
@@ -266,7 +275,7 @@ The frontend will open automatically in your browser at `http://localhost:3000`
 #### UPDATE (Edit Person)
 1. **Frontend**: User clicks edit → Loads data into `PersonForm.jsx`
 2. **Frontend**: User modifies and submits → `personService.updatePerson(id, data)`
-3. **Backend**: Request hits `PUT /api/persons/:id` → `personRoutes.js`
+3. **Backend**: Request hits `PUT /api/persons/:id` → `personRoutes.ts`
 4. **Backend**: Route calls `personController.updatePerson()`
 5. **Backend**: Controller validates and calls `personModel.update(id, data)`
 6. **Database**: Model executes `UPDATE persons SET ... WHERE id = ?`
@@ -276,7 +285,7 @@ The frontend will open automatically in your browser at `http://localhost:3000`
 #### DELETE (Remove Person)
 1. **Frontend**: User clicks delete → Confirmation
 2. **Frontend**: `personService.deletePerson(id)` makes DELETE request
-3. **Backend**: Request hits `DELETE /api/persons/:id` → `personRoutes.js`
+3. **Backend**: Request hits `DELETE /api/persons/:id` → `personRoutes.ts`
 4. **Backend**: Route calls `personController.deletePerson()`
 5. **Backend**: Controller calls `personModel.delete(id)`
 6. **Database**: Model executes `DELETE FROM persons WHERE id = ?`

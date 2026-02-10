@@ -15,11 +15,52 @@
  * - Data access is handled by repositories
  */
 
-const { DataTypes } = require('sequelize');
-const sequelize = require('../config/database');
+import { DataTypes, Model, Optional } from 'sequelize';
+import sequelize from '../config/database';
 
-// Define the Person model (Entity)
-const Person = sequelize.define('Person', {
+// Define the Person attributes interface
+interface PersonAttributes {
+  id: number;
+  name: string;
+  surname: string;
+  email: string;
+  address?: string;
+  phone?: string;
+  created_at?: Date;
+  updated_at?: Date;
+}
+
+// Define the Person creation attributes (id is auto-generated)
+interface PersonCreationAttributes extends Optional<PersonAttributes, 'id' | 'created_at' | 'updated_at'> {}
+
+// Define the Person model class
+class Person extends Model<PersonAttributes, PersonCreationAttributes> implements PersonAttributes {
+  public id!: number;
+  public name!: string;
+  public surname!: string;
+  public email!: string;
+  public address?: string;
+  public phone?: string;
+  public readonly created_at!: Date;
+  public readonly updated_at!: Date;
+
+  // Instance methods (business logic for individual entities)
+  public getFullName(): string {
+    return `${this.name} ${this.surname}`;
+  }
+
+  public getInitials(): string {
+    return `${this.name.charAt(0)}${this.surname.charAt(0)}`.toUpperCase();
+  }
+
+  public isValidEmail(): boolean {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(this.email);
+  }
+}
+
+// Initialize the model
+Person.init({
   id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
@@ -59,6 +100,7 @@ const Person = sequelize.define('Person', {
     allowNull: true
   }
 }, {
+  sequelize,
   tableName: 'persons', // Explicit table name
   timestamps: true,     // Enable automatic timestamps
   createdAt: 'created_at',
@@ -67,12 +109,12 @@ const Person = sequelize.define('Person', {
   // Model-level validation
   validate: {
     // Custom validation: ensure name and surname are not just whitespace
-    nameNotWhitespace() {
+    nameNotWhitespace(this: Person) {
       if (this.name && this.name.trim() === '') {
         throw new Error('Name cannot be empty or whitespace');
       }
     },
-    surnameNotWhitespace() {
+    surnameNotWhitespace(this: Person) {
       if (this.surname && this.surname.trim() === '') {
         throw new Error('Surname cannot be empty or whitespace');
       }
@@ -80,18 +122,4 @@ const Person = sequelize.define('Person', {
   }
 });
 
-// Instance methods (business logic for individual entities)
-Person.prototype.getFullName = function() {
-  return `${this.name} ${this.surname}`;
-};
-
-Person.prototype.getInitials = function() {
-  return `${this.name.charAt(0)}${this.surname.charAt(0)}`.toUpperCase();
-};
-
-Person.prototype.isValidEmail = function() {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return emailRegex.test(this.email);
-};
-
-module.exports = Person;
+export default Person;

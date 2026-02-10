@@ -2,7 +2,7 @@
 
 ## Overview
 
-This is a **Node.js/Express RESTful API** that implements a **Service Layer Architecture** with clear separation of concerns across HTTP, Business Logic, and Data Access layers.
+This is a **Node.js/Express RESTful API with TypeScript** that implements a **Service Layer Architecture** with clear separation of concerns across HTTP, Business Logic, and Data Access layers.
 
 ## Architecture
 
@@ -10,26 +10,26 @@ This is a **Node.js/Express RESTful API** that implements a **Service Layer Arch
 backend/
 ├── src/
 │   ├── common/
-│   │   ├── errors.js           # Shared error classes
+│   │   ├── errors.ts           # Shared error classes
 │   │   └── README.md           # Common utilities documentation
 │   ├── config/
-│   │   └── database.js         # Database connection (Data Access)
+│   │   └── database.ts         # Database connection (Data Access)
 │   ├── controllers/
-│   │   ├── baseController.js   # Base controller with common HTTP logic
-│   │   └── personController.js # Person HTTP Layer - Request/Response handling
+│   │   ├── baseController.ts   # Base controller with common HTTP logic
+│   │   └── personController.ts # Person HTTP Layer - Request/Response handling
 │   ├── services/
-│   │   ├── personService.js    # Person Business Logic Layer - Domain rules & workflows
+│   │   ├── personService.ts    # Person Business Logic Layer - Domain rules & workflows
 │   │   └── README.md           # Service layer documentation
 │   ├── repositories/
-│   │   ├── baseRepository.js   # Generic data access operations
-│   │   ├── personRepository.js # Person-specific data operations
-│   │   ├── cacheManager.js     # Caching layer
-│   │   └── unitOfWork.js       # Transaction management
+│   │   ├── baseRepository.ts   # Generic data access operations
+│   │   ├── personRepository.ts # Person-specific data operations
+│   │   ├── cacheManager.ts     # Caching layer
+│   │   └── unitOfWork.ts       # Transaction management
 │   ├── models/
-│   │   └── personModel.js      # Data models & entity definitions
+│   │   └── personModel.ts      # Data models & entity definitions
 │   ├── routes/
-│   │   └── personRoutes.js     # API route definitions
-│   └── server.js               # Express app setup & entry point
+│   │   └── personRoutes.ts     # API route definitions
+│   └── server.ts               # Express app setup & entry point
 ├── .env.example                 # Environment variables template
 └── package.json                 # Dependencies and scripts
 ```
@@ -285,7 +285,7 @@ DELETE /api/persons/:id
 
 ### 3-Tier Architecture in Backend
 
-#### 1. Data Access Tier (`models/personModel.js`)
+#### 1. Data Access Tier (`models/personModel.ts`)
 - **Responsibility**: Database operations only
 - **Methods**:
   - `findAll()` - SELECT all persons
@@ -295,7 +295,7 @@ DELETE /api/persons/:id
   - `delete(id)` - DELETE person
 - **Key Point**: Only contains SQL queries, no business logic
 
-#### 2. Business Logic Tier (`controllers/personController.js`)
+#### 2. Business Logic Tier (`controllers/personController.ts`)
 - **Responsibility**: Process requests, validate data, apply rules
 - **Methods**:
   - `getAllPersons()` - Handle GET all request
@@ -305,7 +305,7 @@ DELETE /api/persons/:id
   - `deletePerson()` - Handle delete request
 - **Key Point**: Contains validation logic, calls model methods, sends responses
 
-#### 3. Routes (`routes/personRoutes.js`)
+#### 3. Routes (`routes/personRoutes.ts`)
 - **Responsibility**: Map URLs to controller methods
 - **Key Point**: Defines API structure
 
@@ -321,7 +321,7 @@ A pool maintains multiple database connections that can be reused.
 
 **How it works:**
 ```javascript
-// In config/database.js
+// In config/database.ts
 const pool = mysql.createPool({
   connectionLimit: 10,  // Max 10 concurrent connections
   // ... other config

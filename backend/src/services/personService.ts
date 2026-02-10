@@ -16,13 +16,27 @@
  * - Business rules are centralized here
  */
 
-const { BusinessError, ValidationError, NotFoundError, ConflictError, ForbiddenError } = require('../common/errors');
+import { BusinessError, ValidationError, NotFoundError, ConflictError, ForbiddenError } from '../common/errors';
+
+/**
+ * Person data interface for type safety
+ */
+interface PersonData {
+  name: string;
+  surname: string;
+  email: string;
+  phone: string;
+  address: string;
+}
 
 /**
  * Person Service - Business Logic Layer
  */
-class PersonService {
-  constructor(personRepository, unitOfWork = null) {
+export class PersonService {
+  private personRepository: any;
+  private unitOfWork: any;
+
+  constructor(personRepository: any, unitOfWork: any = null) {
     this.personRepository = personRepository;
     this.unitOfWork = unitOfWork; // Optional - for future complex operations
   }
@@ -33,7 +47,7 @@ class PersonService {
    * @param {Object} data - Person data to validate
    * @throws {BusinessError} If validation fails
    */
-  validateBusinessRules(data) {
+  validateBusinessRules(data: PersonData) {
     const errors = [];
 
     // Business Rule: All core fields are required
@@ -85,7 +99,7 @@ class PersonService {
    * @param {number} excludeId - Optional ID to exclude (for updates)
    * @throws {BusinessError} If email is not unique
    */
-  async checkEmailUniqueness(email, excludeId = null) {
+  async checkEmailUniqueness(email: string, excludeId: number | null = null) {
     try {
       const exists = await this.personRepository.emailExists(email, excludeId);
       if (exists) {
@@ -105,7 +119,7 @@ class PersonService {
    * @param {Object} data - Raw person data
    * @returns {Object} Transformed person data
    */
-  applyBusinessTransformations(data) {
+  applyBusinessTransformations(data: PersonData) {
     return {
       ...data,
       // Business Rule: Auto-generate display name
@@ -133,7 +147,7 @@ class PersonService {
    * @returns {Promise<Object>} Created person
    * @throws {BusinessError} If business rules are violated
    */
-  async createPerson(personData) {
+  async createPerson(personData: PersonData) {
     // Step 1: Validate business rules (no transaction needed)
     this.validateBusinessRules(personData);
 
@@ -190,7 +204,7 @@ class PersonService {
    * @returns {Promise<Object>} Updated person
    * @throws {BusinessError} If business rules are violated
    */
-  async updatePerson(id, personData) {
+  async updatePerson(id: number, personData: PersonData) {
     try {
       // Step 1: Get current person for business validation
       const existingPerson = await this.personRepository.findById(id);
@@ -235,7 +249,7 @@ class PersonService {
    * @returns {Promise<boolean>} True if deleted
    * @throws {BusinessError} If business rules prevent deletion
    */
-  async deletePerson(id) {
+  async deletePerson(id: number) {
     try {
       // Business Rule: Check if person can be deleted (example: no dependencies)
       const person = await this.personRepository.findById(id);
@@ -270,7 +284,7 @@ class PersonService {
    * @param {Object} options - Query options
    * @returns {Promise<Array>} Persons
    */
-  async getAllPersons(options = {}) {
+  async getAllPersons(options: any = {}) {
     try {
       return await this.personRepository.findAll(options);
     } catch (error) {
@@ -285,7 +299,7 @@ class PersonService {
    * @returns {Promise<Object>} Person
    * @throws {BusinessError} If person not found
    */
-  async getPersonById(id) {
+  async getPersonById(id: number) {
     try {
       const person = await this.personRepository.findById(id);
       if (!person) {
@@ -307,7 +321,7 @@ class PersonService {
    * @param {Object} options - Search options
    * @returns {Promise<Array|Object>} Search results
    */
-  async searchPersons(filters, options = {}) {
+  async searchPersons(filters: any, options: any = {}) {
     try {
       // Business Rule: Apply search restrictions if needed
       // For example, limit search results for performance
@@ -347,5 +361,3 @@ class PersonService {
     }
   }
 }
-
-module.exports = PersonService;

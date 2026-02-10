@@ -16,18 +16,33 @@
  * - Error handling is managed by base controller
  */
 
-const { BaseController } = require('./baseController');
+import { Request, Response } from 'express';
+import { BaseController } from './baseController';
 
-class PersonController extends BaseController {
-  constructor(personService) {
+// Define interface for PersonService
+interface PersonService {
+  getAllPersons(options?: any): Promise<any[]>;
+  getPersonById(id: number): Promise<any>;
+  createPerson(personData: any): Promise<any>;
+  updatePerson(id: number, personData: any): Promise<any>;
+  deletePerson(id: number): Promise<boolean>;
+  searchPersons(filters: any, options?: any): Promise<any>;
+  getIncompleteProfiles(): Promise<any[]>;
+}
+
+export class PersonController extends BaseController {
+  private personService: PersonService;
+
+  constructor(personService: PersonService) {
     super();
     this.personService = personService;
   }
+
   /**
    * GET /api/persons
    * Get all persons
    */
-  getAllPersons = async (req, res) => {
+  getAllPersons = async (req: Request, res: Response): Promise<any> => {
     return this.executeAction(async () => {
       const options = req.query;
       const persons = await this.personService.getAllPersons(options);
@@ -43,12 +58,12 @@ class PersonController extends BaseController {
    * GET /api/persons/:id
    * Get a single person by ID
    */
-  getPersonById = async (req, res) => {
+  getPersonById = async (req: Request, res: Response): Promise<any> => {
     return this.executeAction(async () => {
       const { id } = req.params;
 
       // HTTP validation
-      const personId = this.validateId(id);
+      const personId = this.validateId(id as string);
       if (!personId) {
         return this.sendError(res, 'Invalid person ID format', 400);
       }
@@ -62,7 +77,7 @@ class PersonController extends BaseController {
    * POST /api/persons
    * Create a new person
    */
-  createPerson = async (req, res) => {
+  createPerson = async (req: Request, res: Response): Promise<any> => {
     return this.executeAction(async () => {
       const rawData = req.body;
 
@@ -83,13 +98,13 @@ class PersonController extends BaseController {
    * PUT /api/persons/:id
    * Update an existing person
    */
-  updatePerson = async (req, res) => {
+  updatePerson = async (req: Request, res: Response): Promise<any> => {
     return this.executeAction(async () => {
       const { id } = req.params;
       const rawData = req.body;
 
       // HTTP validation
-      const personId = this.validateId(id);
+      const personId = this.validateId(id as string);
       if (!personId) {
         return this.sendError(res, 'Invalid person ID format', 400);
       }
@@ -111,12 +126,12 @@ class PersonController extends BaseController {
    * DELETE /api/persons/:id
    * Delete a person
    */
-  deletePerson = async (req, res) => {
+  deletePerson = async (req: Request, res: Response): Promise<any> => {
     return this.executeAction(async () => {
       const { id } = req.params;
 
       // HTTP validation
-      const personId = this.validateId(id);
+      const personId = this.validateId(id as string);
       if (!personId) {
         return this.sendError(res, 'Invalid person ID format', 400);
       }
@@ -138,10 +153,10 @@ class PersonController extends BaseController {
    * GET /api/persons/search
    * Search and filter persons
    */
-  searchPersons = async (req, res) => {
+  searchPersons = async (req: Request, res: Response): Promise<any> => {
     return this.executeAction(async () => {
-      const filters = {};
-      const options = {};
+      const filters: any = {};
+      const options: any = {};
 
       // Parse query parameters (HTTP layer concern)
       const { name, email, phone, address, createdAfter, createdBefore, page, limit } = req.query;
@@ -153,8 +168,8 @@ class PersonController extends BaseController {
       if (createdAfter) filters.createdAfter = createdAfter;
       if (createdBefore) filters.createdBefore = createdBefore;
 
-      if (page) options.page = parseInt(page);
-      if (limit) options.limit = parseInt(limit);
+      if (page) options.page = parseInt(page as string);
+      if (limit) options.limit = parseInt(limit as string);
 
       // Business logic delegated to service
       const results = await this.personService.searchPersons(filters, options);
@@ -180,7 +195,7 @@ class PersonController extends BaseController {
    * GET /api/persons/incomplete
    * Get persons with incomplete profiles
    */
-  getIncompleteProfiles = async (req, res) => {
+  getIncompleteProfiles = async (req: Request, res: Response): Promise<any> => {
     return this.executeAction(async () => {
       const persons = await this.personService.getIncompleteProfiles();
 
@@ -192,5 +207,3 @@ class PersonController extends BaseController {
     }, res);
   };
 }
-
-module.exports = PersonController;
